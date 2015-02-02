@@ -6,11 +6,6 @@ import string
 
 # shared code
 
-# the to_json function was previously in this module, but
-# has now been moved to its own module; see caxiam.to_json
-# instead - this import is to support legacy code
-from caxiam.json_tools import to_json
-
 # compare version strings
 #
 # A version string is compared character-by-character,
