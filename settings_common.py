@@ -7,6 +7,9 @@ import os.path
 # https:// BUT THIS WILL DEPEND ON THE SITE. We keep this as
 # a separate field so we don't have to update all the
 # hostname variables as well.
+# NOTE: Django 1.7 adds a "scheme" property to the request
+# object but since that's determined from the connection
+# itself, it can be wrong.
 SCULPT_SITE_PROTOCOL = 'http://'
 
 # if this is set to True, then attempts to send email that
