@@ -48,7 +48,7 @@ SCULPT_EMAIL_OVERRIDE_TOLIST = None
 # extend the error messages with app-specific ones.
 # This list should be redefined in settings.py to include
 # the app's error messages file in addition to the core
-# Caxiam one.
+# sculpt-ajax one.
 SCULPT_AJAX_FORM_ERROR_MESSAGES = (
         'sculpt.ajax.form_errors',
     )

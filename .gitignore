@@ -1,0 +1,7 @@
+._*
+.DS_Store
+*.pid
+*.pyc
+settings_local_post.py
+.sass-cache
+
