@@ -133,7 +133,7 @@ class Enumeration(object):
 
     # generate a tuple of 2-tuples given a pair of column names
     def tuples(self, column1, column2):
-        return tuple( (d['value'],d['id']) for d in self._data_dicts )
+        return tuple( (d[column1],d[column2]) for d in self._data_dicts )
 
     #
     # cached access to common tuples-of-tuples extractions
