@@ -53,6 +53,11 @@ SCULPT_AJAX_FORM_ERROR_MESSAGES = (
         'sculpt.ajax.form_errors',
     )
 
+# if the sculpt.model_tools is available, this can be
+# set to True to derive all AjaxView classes in a way
+# that includes AjaxLoginRequiredMixin
+SCULPT_AJAX_LOGIN_REQUIRED = False
+
 # FastSave optimizes record saving to avoid extra queries,
 # but assumes we never create records in the database with
 # pre-defined IDs; if you are using FastSave and loading
@@ -93,6 +98,15 @@ SCULPT_DEFAULT_TOAST_DURATION = 4
 # debug-related settings
 # NOTE: the defaults should ALWAYS BE OFF
 #
+
+# when dumping, which classes should be skipped?
+# this is primarily a performance enhancement, as some
+# of Django's internal data structures are very, very
+# deeply nested
+SCULPT_DEBUG_SKIP_CLASSES = (
+    'django.db.models.sql.constants.JoinInfo',
+    'django.db.models.sql.constants.SelectInfo',
+)
 
 # set this to True to report each request and its time;
 # also enabled implicitly if DUMP_SQL or DUMP_SESSION
