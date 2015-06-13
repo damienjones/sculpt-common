@@ -1,4 +1,5 @@
 from sculpt.common.parameter_proxy import parameter_proxy
+import collections
 
 # Enumeration
 #
@@ -95,6 +96,7 @@ class Enumeration(object):
 
         # create indices for each column heading; any entries
         # which do not hold values in that column are ignored
+        # (we also ignore entries that are not hashable)
         self._idxs = {}
         for i in range(len(self._columns)):
             column = self._columns[i]
@@ -103,7 +105,7 @@ class Enumeration(object):
 
             for j in range(len(self._data)):
                 row = self._data[j]
-                if i < len(row):
+                if i < len(row) and isinstance(row[i], collections.Hashable):
                     idx[row[i]] = j
 
         # go ahead and prep the data dicts for each row, so
@@ -151,6 +153,11 @@ class Enumeration(object):
         return self._labels
             
     # given a particular column name and value, return the row
+    #
+    # NOTE: this is more efficient than using the .data
+    # property, and is the preferred implementation for code
+    # rather than templates
+    #
     def get_data(self, column, value):
         # if column is not in self._idxs, KeyError raised
         if value not in self._idxs[column]:
@@ -162,6 +169,11 @@ class Enumeration(object):
 
     # given a particular ID, return the row
     # (a thin wrapper around get_data())
+    #
+    # NOTE: this is called _by_id because the
+    # "value" that is passed is actually
+    # checked to see if it's an ID value first
+    #
     def get_data_by_id(self, value):
         return self.get_data('value', self.get_value(value))
         
