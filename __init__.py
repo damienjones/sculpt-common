@@ -151,6 +151,38 @@ def merge_dicts(dict1, dict2):
             dict1[k] = dict2[k]
     return dict1
 
+# extract from JSON
+#
+# Often when working with JSON data fetched from outside
+# sources, we need to quickly look for a deeply-nested
+# element and extract it if it's available or return None
+# if it's missing. We need to check at each level of the
+# nested structure if the next step is available.
+#
+def extract(obj, *args):
+    for a in args:
+        if isinstance(obj, list):
+            # should be a numeric index
+            if a >= 0 and a < len(obj):
+                obj = obj[a]
+            else:
+                return None
+
+        elif isinstance(obj, dict):
+            # could be any kind of key
+            if a in obj:
+                obj = obj[a]
+            else:
+                return None
+
+        else:
+            # some other type we can't look into;
+            # fail (but quietly)
+            # THIS IS A DESIGN CHOICE. We could raise
+            # an exception instead.
+            return None
+
+    return obj
 # slugify extension
 #
 # Django's slugify() is nice and robust, except that it
@@ -164,3 +196,5 @@ def merge_dicts(dict1, dict2):
 #
 def caxiam_slugify(value):
     return slugify(unicode(value.replace('/','-')))
+
+
