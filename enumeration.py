@@ -88,8 +88,9 @@ class Enumeration(object):
     
     def __init__(self, *args, **kwargs):
         # pluck data from parameters
-        self._columns = kwargs.get('labels', ( 'value', 'id' ))
         self._data = kwargs.get('choices', args)
+        default_column_names = ( 'value', 'id' ) if len(self._data) and len(self._data[0]) == 2 else ( 'value', 'id', 'label' )
+        self._columns = kwargs.get('labels', default_column_names)
         
         # create column-label to column-index lookup
         self._columns_idx = dict([ (self._columns[i],i) for i in range(len(self._columns)) ])
