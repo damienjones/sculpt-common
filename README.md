@@ -1,7 +1,19 @@
 sculpt-common
 =============
 
-Django is a great framework, but there are a few things that are missing or just cumbersome to use. This is a collection of small additions that make life easier. Many of the other sculpt-* projects I've written rely on some or all of this code.
+Django is a great framework, but there are a few things that are missing or just cumbersome to use. This is a collection of small additions that make life easier. Many of the other sculpt-* Python projects I've written rely on some or all of this code.
+
+Special Note
+------------
+
+This is not a complete project. It's not packaged as a Python project (so you have to drop the source into your own project directly), the directory structure doesn't match the package's expectations of itself, there are no unit tests, and the only documentation is within the code itself. I don't really expect anyone else to use this code... yet. All of those things will be addressed at some point.
+
+That said, the code _is_ being used. This started with work I did while at Caxiam (and I obtained a comprehensive license to continue with the code) so here and there are references to Caxiam that I am slowly replacing. I've done quite a bit of refactoring since then and expect to do more.
+
+License
+-------
+
+At the moment this is LGPL; see LICENSE.md for details.
 
 Features
 --------
@@ -9,7 +21,7 @@ Features
 * An Enumeration class
     * Designed to support Django's tuple-of-tuples used to enumerate choices for model fields.
     * Allows semantic code, like MyEnum.SOME_VALUE, instead of directly using the magic value.
-    * Supports additional fields per enumerated value, especially a "display" field that is suitable for users when the programmatic label is not.
+    * Supports additional fields per enumerated value, especially a "label" field that is suitable for users when the programmatic label is not.
 * A ParameterProxy class
     * Allows a class to designate a single-parameter function as callable from a Django template, where normally it would not be.
 * Conversion edge case functions:
