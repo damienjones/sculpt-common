@@ -1,4 +1,3 @@
-from django.utils.text import slugify
 from sculpt.common.enumeration import Enumeration   # more convenient to import from here than .enumeration
 from sculpt.common.parameter_proxy import parameter_proxy   # and here too
 import datetime
@@ -183,18 +182,24 @@ def extract(obj, *args):
             return None
 
     return obj
+
 # slugify extension
 #
 # Django's slugify() is nice and robust, except that it
 # demands unicode input on Python 2 and it drops / instead
 # of replacing it with -
 #
-# NOTE: we call it caxiam_slugify instead of just slugify
+# Since this is a wrapper around Django's slugify, you need
+# Django installed to use this. But you can import the rest
+# of the module without Django.
+#
+# NOTE: we call it sculpt_slugify instead of just slugify
 # so that wherever it appears in code, it's crystal clear
 # that it's NOT Django's slugify; this helps prevent subtle
-# bugs due to bad import directives
+# bugs due to bad import directives.
 #
-def caxiam_slugify(value):
+def sculpt_slugify(value):
+    from django.utils.text import slugify
     return slugify(unicode(value.replace('/','-')))
 
 

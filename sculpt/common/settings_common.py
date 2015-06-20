@@ -1,5 +1,8 @@
 import os.path
 
+# TODO: udpate to use Django's app-specific settings so
+# they're not all shared in this library.
+
 # Django doesn't explicitly provide this and assumes it can
 # be derived on-demand from the request data, but this isn't
 # always true with load-balanced setups and it needs to be
