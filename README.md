@@ -31,4 +31,4 @@ Features
 * compare_strings - a function to sensibly compare version strings, e.g. 1.2a < 1.2q
 * merge_dicts - overlay an arbitrary number of dicts and return the response.
 * Easy method of importing all submodules within a module and catching exceptions (useful for batch processing).
-* Verified HTTPS connector (validates server certificates instead of swallowing certificate errors; doing SSL/TLS without this leaves you open to man-in-the-middle attacks).
+* Verified HTTPS connector (validates server certificates instead of swallowing certificate errors; doing SSL/TLS without this leaves you open to man-in-the-middle attacks). **TODO**
