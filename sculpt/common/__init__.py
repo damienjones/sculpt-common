@@ -158,28 +158,42 @@ def merge_dicts(dict1, dict2):
 # if it's missing. We need to check at each level of the
 # nested structure if the next step is available.
 #
+# This is a wrapper around extract_default, because Python's
+# rules for assigning parameters will fill in the default
+# with the first entry from *args if it's missing, which is
+# not what we want.
+#
 def extract(obj, *args):
+    return extract_default(obj, None, *args)
+
+# Same as above, except this time we can provide a default
+# value to use if the requested item can't be found (no
+# matter where in the path it fails). This is similar to
+# Python's .get() method for dicts. Note that with this
+# method, default must be specified; ø
+#
+def extract_default(obj, default, *args):
     for a in args:
         if isinstance(obj, list):
             # should be a numeric index
             if a >= 0 and a < len(obj):
                 obj = obj[a]
             else:
-                return None
+                return default
 
         elif isinstance(obj, dict):
             # could be any kind of key
             if a in obj:
                 obj = obj[a]
             else:
-                return None
+                return default
 
         else:
             # some other type we can't look into;
             # fail (but quietly)
             # THIS IS A DESIGN CHOICE. We could raise
             # an exception instead.
-            return None
+            return default
 
     return obj
 
