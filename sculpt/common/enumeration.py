@@ -261,7 +261,7 @@ class Enumeration(object):
 # of the variable we specify. So, we include this in the
 # class definition:
 #
-#       bar_data = property(EnumerationData(BARS, 'bar'))
+#       bar_data = property(EnumerationData('BARS', 'bar'))
 #
 # And then the cumbersome construct becomes this:
 #
@@ -271,8 +271,14 @@ class Enumeration(object):
 # derived from bar, though, so it's best to use a clear
 # naming convention.
 #
+# NOTE: the enumeration is specified via attribute name
+# rather than directly passed so that the lookup is done
+# at the moment the data is fetched; in this way, the
+# data property can be added to a base class even if the
+# derived class overrides the enumeration.
+#
 def EnumerationData(enumeration, fieldname):
     def inner(self):
-        return enumeration.get_data_by_id(getattr(self, fieldname))
+        return getattr(self,enumeration).get_data_by_id(getattr(self, fieldname))
     return inner
 
