@@ -7,62 +7,6 @@ import string
 
 # shared code
 
-# compare version strings
-#
-# A version string is compared character-by-character,
-# except that whenever digits are encountered, all consecutive
-# digits are converted to an integer and compared. Therefore:
-#   1.1 < 1.2
-#   1.2 < 1.10
-#   1.2a < 1.2q
-#   1.1.15 < 1.2.9
-#   1.103b < 1.1011c    !! 103 < 1011
-#   1.1.b < 1.01.c      !! b < c
-#   1.01 < 1.1          !! lexical compare if no difference
-#
-# NOTE: this does not deal with Unicode digits other than 0-9.
-# Don't try to do cute things with version numbers.
-#
-digit_extractor = re.compile(r'[0-9]+')
-
-def compare_versions(a, b):
-    # null cases
-    if a == None and b == None:
-        return 0
-    elif a == None:
-        return -1
-    elif b == None:
-        return 1
-        
-    # non-null cases
-    pos_a = 0
-    pos_b = 0
-    while pos_a < len(a) and pos_b < len(b):
-        if a[pos_a] in string.digits and b[pos_b] in string.digits:
-            # number-to-number comparison
-            pa = digit_extractor.match(a, pos_a).group()
-            pb = digit_extractor.match(b, pos_b).group()
-            na = int(pa, 10)
-            nb = int(pb, 10)
-            r = cmp(na, nb)
-            if r != 0:
-                return r
-                
-            pos_a += len(pa)
-            pos_b += len(pb)
-            
-        else:
-            # simple character comparison
-            r = cmp(a[pos_a], b[pos_b])
-            if r != 0:
-                return r
-            pos_a += 1
-            pos_b += 1
-
-    # no differences using above algorithm; use regular
-    # string comparison
-    return cmp(a,b)
-
 # for a particular module, find all the sub-modules and import them
 # (first-level crawl only)
 #
