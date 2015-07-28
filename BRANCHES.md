@@ -10,3 +10,8 @@ Because the README claims something that isn't true.
 
 First public release.
 
+## Features
+
+### feature/add-docs
+
+Time to write some documentation!
