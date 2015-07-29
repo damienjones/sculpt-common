@@ -14,10 +14,10 @@ here = path.abspath(path.dirname(__file__))
 
 setup(
 	name='sculpt.common',
-	version='0.1.1',
+	version='0.2',
 	description='A collection of utilities for other sculpt.* libraries.',
 	long_description='',
-	url='https://github.com/damienjones/sculpt.common',
+	url='https://github.com/damienjones/sculpt-common',
 	author='Damien M. Jones',
 	author_email='damien@codesculpture.com',
 	license='LGPLv2',
