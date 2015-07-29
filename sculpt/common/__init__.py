@@ -7,79 +7,6 @@ import string
 
 # shared code
 
-# compare version strings
-#
-# A version string is compared character-by-character,
-# except that whenever digits are encountered, all consecutive
-# digits are converted to an integer and compared. Therefore:
-#   1.1 < 1.2
-#   1.2 < 1.10
-#   1.2a < 1.2q
-#   1.1.15 < 1.2.9
-#   1.103b < 1.1011c    !! 103 < 1011
-#   1.1.b < 1.01.c      !! b < c
-#   1.01 < 1.1          !! lexical compare if no difference
-#
-# NOTE: this does not deal with Unicode digits other than 0-9.
-# Don't try to do cute things with version numbers.
-#
-digit_extractor = re.compile(r'[0-9]+')
-
-def compare_versions(a, b):
-    # null cases
-    if a == None and b == None:
-        return 0
-    elif a == None:
-        return -1
-    elif b == None:
-        return 1
-        
-    # non-null cases
-    pos_a = 0
-    pos_b = 0
-    while pos_a < len(a) and pos_b < len(b):
-        if a[pos_a] in string.digits and b[pos_b] in string.digits:
-            # number-to-number comparison
-            pa = digit_extractor.match(a, pos_a).group()
-            pb = digit_extractor.match(b, pos_b).group()
-            na = int(pa, 10)
-            nb = int(pb, 10)
-            r = cmp(na, nb)
-            if r != 0:
-                return r
-                
-            pos_a += len(pa)
-            pos_b += len(pb)
-            
-        else:
-            # simple character comparison
-            r = cmp(a[pos_a], b[pos_b])
-            if r != 0:
-                return r
-            pos_a += 1
-            pos_b += 1
-
-    # no differences using above algorithm; use regular
-    # string comparison
-    return cmp(a,b)
-
-# useful conversion edge case handlers
-
-# empty_if_none
-# returns the original string, or '' if it's None
-# (this is useful shorthand when s is a complicated expression)
-def empty_if_none(s):
-    return s if s != None else ''
-
-# given a particular string, attempt to parse it as an
-# ISO-format datetime and return that; return None if
-# not valid
-def parse_datetime(v):
-    try:
-        return datetime.datetime.strptime(v, '%Y-%m-%dT%H:%M:%S')
-    except ValueError:
-        return None
-
 # for a particular module, find all the sub-modules and import them
 # (first-level crawl only)
 #
@@ -149,53 +76,6 @@ def merge_dicts(dict1, dict2):
         else:
             dict1[k] = dict2[k]
     return dict1
-
-# extract from JSON
-#
-# Often when working with JSON data fetched from outside
-# sources, we need to quickly look for a deeply-nested
-# element and extract it if it's available or return None
-# if it's missing. We need to check at each level of the
-# nested structure if the next step is available.
-#
-# This is a wrapper around extract_default, because Python's
-# rules for assigning parameters will fill in the default
-# with the first entry from *args if it's missing, which is
-# not what we want.
-#
-def extract(obj, *args):
-    return extract_default(obj, None, *args)
-
-# Same as above, except this time we can provide a default
-# value to use if the requested item can't be found (no
-# matter where in the path it fails). This is similar to
-# Python's .get() method for dicts. Note that with this
-# method, default must be specified; ø
-#
-def extract_default(obj, default, *args):
-    for a in args:
-        if isinstance(obj, list):
-            # should be a numeric index
-            if a >= 0 and a < len(obj):
-                obj = obj[a]
-            else:
-                return default
-
-        elif isinstance(obj, dict):
-            # could be any kind of key
-            if a in obj:
-                obj = obj[a]
-            else:
-                return default
-
-        else:
-            # some other type we can't look into;
-            # fail (but quietly)
-            # THIS IS A DESIGN CHOICE. We could raise
-            # an exception instead.
-            return default
-
-    return obj
 
 # slugify extension
 #
