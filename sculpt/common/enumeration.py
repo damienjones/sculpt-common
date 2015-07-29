@@ -47,11 +47,6 @@ import collections
 #
 #     MY_ENUMS.data.FOO['<column_name>']
 #
-#**** and if you know the value of a particular column you can
-#**** use that to look up the row:
-#****
-#****     MY_ENUMS.columns.<column_name1>.<column_value>['<column_name2>']
-#
 # You can generate a tuple of 2-tuples from any two columns:
 #
 #     MY_ENUMS.tuples('<column_name1>','<column_name2>')
@@ -191,37 +186,6 @@ class Enumeration(object):
     # so we handle that ourselves in the wrapper
     data = property(parameter_proxy('get_data_by_id'))
 
-    # look up an attribute, but get the whole row,
-    # not just the value column
-    #
-    # NOTE: this is a function generator
-
-    # columns
-    #
-    # Django automatically creates a get_<field>_display
-    # function for each IntegerField using enumerated
-    # choices. The problem is that it uses element 1 from
-    # the tuple, which is the programmatic label (shame on
-    # the Django dev team for not using better enumerations).
-    # We want to return the nicer label at element 2, but
-    # also make it possible to access the rest of the
-    # enumeration's data in case it has been provided.
-    #
-    # To accommodate this, we create a wrapper that makes
-    # a property that returns the tuple from the enumerated
-    # type. It requires the field name.
-    #
-    # NOTE: this is a function generator
-    #
-    def columns(self, column):
-
-        # this is the one-off function we need
-        def _inner(inner_self):
-            return self.get_tuple(getattr(inner_self, field_name))
-
-        # return that function
-        return _inner
-
     # sometimes (e.g. JSON parsing) we want to accept either
     # a numerical value directly or its label; this method
     # accepts either and always returns the value
@@ -258,4 +222,63 @@ class Enumeration(object):
     # we want to test if an id is in the enumeration
     def __contains__(self, key):
         return key in self._idxs['id']
+
+
+# EnumerationData
+#
+# Often we want to use an Enumeration to set acceptable choices
+# on a field, but still have access to all the other data
+# associated with the current enumerated choice. For example:
+#
+#   class Foo(models.Model):
+#       BARS = Enumeration(
+#           labels = ('value','id','label','helper'),
+#           choices = (
+#               (0,'BAZ','baz',BazHelper),
+#               (1,'BOOYAH','booyah',BooyahHelper),
+#           )
+#       )
+#       bar = models.IntegerField(choices = BARS.choices)
+#
+# If we have an instance of Foo named foo, we can access the
+# numerical value of bar as foo.bar directly, and compare it
+# to enumerated values like this:
+#
+#   if foo.bar == Foo.BARS.BAZ:
+#       ...
+#
+# But if we want to access any of the corresponding data that
+# goes along with the actual value, we have to use the far
+# more cumbersome construct:
+#
+#   helper = Foo.BARS.get_data_by_id(foo.bar)['helper']
+#
+# Which requires us to know what the correct enumeration to
+# go with .bar happens to be, a potential source of errors.
+#
+# This function allows us to create a property on Foo that
+# automatically fetches the correct data based on the value
+# of the variable we specify. So, we include this in the
+# class definition:
+#
+#       bar_data = property(EnumerationData('BARS', 'bar'))
+#
+# And then the cumbersome construct becomes this:
+#
+#   helper = foo.bar_data['helper']
+#
+# Which is much simpler. It does hide that bar_data is
+# derived from bar, though, so it's best to use a clear
+# naming convention.
+#
+# NOTE: the enumeration is specified via attribute name
+# rather than directly passed so that the lookup is done
+# at the moment the data is fetched; in this way, the
+# data property can be added to a base class even if the
+# derived class overrides the enumeration.
+#
+def EnumerationData(enumeration, fieldname):
+    def inner(self):
+        return getattr(self,enumeration).get_data_by_id(getattr(self, fieldname))
+    return inner
 
