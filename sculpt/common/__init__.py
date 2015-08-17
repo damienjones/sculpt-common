@@ -1,4 +1,4 @@
-from sculpt.common.enumeration import Enumeration   # more convenient to import from here than .enumeration
+from sculpt.common.enumeration import Enumeration, EnumerationData   # more convenient to import from here than .enumeration
 from sculpt.common.parameter_proxy import parameter_proxy   # and here too
 import datetime
 import os
