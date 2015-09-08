@@ -285,7 +285,9 @@ class Enumeration(object):
 def EnumerationData(enumeration, fieldname):
     def inner(self):
         if not isinstance(enumeration, Enumeration):
-            enumeration = getattr(self, enumeration)
-        return enumeration.get_data_by_id(getattr(self, fieldname))
+            e = getattr(self, enumeration)
+        else:
+            e = enumeration
+        return e.get_data_by_id(getattr(self, fieldname))
     return inner
 
