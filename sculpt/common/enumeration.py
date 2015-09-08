@@ -275,10 +275,17 @@ class Enumeration(object):
 # rather than directly passed so that the lookup is done
 # at the moment the data is fetched; in this way, the
 # data property can be added to a base class even if the
-# derived class overrides the enumeration.
+# derived class overrides the enumeration. If you must
+# reference an enumeration that isn't a member of the class
+# (possibly because you're sharing it among several
+# classes, which is good) then you can specify an actual
+# Enumeration object as well, but you will then lose the
+# polymorphic capability.
 #
 def EnumerationData(enumeration, fieldname):
     def inner(self):
-        return getattr(self,enumeration).get_data_by_id(getattr(self, fieldname))
+        if not isinstance(enumeration, Enumeration):
+            enumeration = getattr(self, enumeration)
+        return enumeration.get_data_by_id(getattr(self, fieldname))
     return inner
 
