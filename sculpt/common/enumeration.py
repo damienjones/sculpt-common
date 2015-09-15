@@ -223,6 +223,11 @@ class Enumeration(object):
     def __contains__(self, key):
         return key in self._idxs['id']
 
+    # and because it's useful, provide a method to
+    # iterate over the enumeration as dicts
+    def iter_dicts(self):
+        return self._data_dicts.__iter__()
+
 
 # EnumerationData
 #
