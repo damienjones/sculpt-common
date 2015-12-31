@@ -81,6 +81,8 @@ class Enumeration(object):
     _choices = None
     _labels = None
     
+    _values_are_strings = False
+
     def __init__(self, *args, **kwargs):
         # pluck data from parameters
         self._data = kwargs.get('choices', args)
@@ -120,6 +122,14 @@ class Enumeration(object):
                     data_dict[column] = row[i]
                 else:
                     data_dict[column] = None
+
+        # we need to know if our values ever include strings
+        # because we change how get_value() works if our values
+        # include strings
+        for d in self._data_dicts:
+            if isinstance(d.get('value'), basestring):
+                self._values_are_strings = True
+                break
 
         # fun bit: we want .data to be a parameter proxy to
         # the get_data() method, but we need a reference to
@@ -190,14 +200,24 @@ class Enumeration(object):
     # a numerical value directly or its label; this method
     # accepts either and always returns the value
     #
-    # NOTE: does NOT validate the data; numbers not part
-    # of the enumeration will not be rejected and names
-    # not part of the enumeration will raise KeyError
+    # NOTE: does NOT validate values but may validate IDs;
+    # numbers not part of the enumeration will not be
+    # rejected, but names not part of the enumeration will
+    # raise AttributeError if none of the values are strings
     #
     def get_value(self, value):
         if isinstance(value, basestring):
-            # a string; assume it's an ID, convert to value
-            return self.get_data('id', value)['value']
+            if self._values_are_strings:
+                # this might be an ID or it might be a value;
+                # attempt to translate it, but don't throw an
+                # error if that fails
+                return self._idxs['id'].get(value, value)
+
+            else:
+                # assume it's an ID, convert to value and
+                # raise AttributeError if it's wrong
+                return self.get_data('id', value)['value']
+
         else:
             # already a value, return as-is
             return value
