@@ -84,11 +84,23 @@ class Enumeration(object):
     _values_are_strings = False
 
     def __init__(self, *args, **kwargs):
-        # pluck data from parameters
-        self._data = kwargs.get('choices', args)
+        # before we begin processing enumeration entries, scan
+        # it for callables which might yield generated entries;
+        # this can be used to generate additional enumerations
+        # that are partially derived from other enumerations
+        self._data = []
+        choices = kwargs.get('choices', args)
+        for t in choices:
+            if callable(t):
+                self._data.extend(t())
+            else:
+                self._data.append(t)
+
+        # pluck data from parameters now that the choices are
+        # fully generated and flattened
         default_column_names = ( 'value', 'id' ) if len(self._data) and len(self._data[0]) == 2 else ( 'value', 'id', 'label' )
         self._columns = kwargs.get('labels', default_column_names)
-        
+
         # create column-label to column-index lookup
         self._columns_idx = dict([ (self._columns[i],i) for i in range(len(self._columns)) ])
 
@@ -316,3 +328,23 @@ def EnumerationData(enumeration, fieldname):
         return e.get_data_by_id(getattr(self, fieldname))
     return inner
 
+
+# Sometimes we need an enumeration to be derived from,
+# or include elements of, another enumeration. To handle
+# this we define a simple method that walks through the
+# enumeration and a template, fills out any strings with
+# placeholders, and inserts the resulting list directly
+# into the new enumeration.
+#
+# NOTE: this actually returns a callable suitable for
+# use in the Enumeration choices list.
+#
+def expand_enumeration(template, source):
+
+    def inner():
+        expanded = []
+        for d in source._data_dicts:
+            expanded.append(tuple([ v % d if isinstance(v, basestring) else v for v in template ]))
+        return expanded
+
+    return inner
