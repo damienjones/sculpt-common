@@ -223,7 +223,10 @@ class Enumeration(object):
                 # this might be an ID or it might be a value;
                 # attempt to translate it, but don't throw an
                 # error if that fails
-                return self._idxs['id'].get(value, value)
+                if value in self._idxs['id']:
+                    return self.get_data('id', value)['value']
+                else:
+                    return value
 
             else:
                 # assume it's an ID, convert to value and
