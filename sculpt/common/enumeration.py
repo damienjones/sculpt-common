@@ -263,6 +263,12 @@ class Enumeration(object):
     def iter_dicts(self):
         return self._data_dicts.__iter__()
 
+    # if you want to insert an enumeration directly
+    # without transforming its entries (e.g. with
+    # expand_enumeration) you can use this as a
+    # function that will be accepted by the constructor
+    def insert_enumeration(self):
+        return self._data
 
 # EnumerationData
 #
