@@ -1,4 +1,4 @@
-from sculpt.common.enumeration import Enumeration   # more convenient to import from here than .enumeration
+from sculpt.common.enumeration import Enumeration, EnumerationData   # more convenient to import from here than .enumeration
 from sculpt.common.parameter_proxy import parameter_proxy   # and here too
 import datetime
 import os
@@ -20,8 +20,10 @@ import string
 # the sub-modules one by one, but do so in a predictable (alphabetical)
 # order, with exception-catching for each one. A boolean is returned
 # indicating whether any of the sub-modules failed to import properly.
+# You can also supply an exception handler which will be called for each
+# submodule that raises an exception, as long as catch_errors is True.
 # 
-def import_all_submodules(mod, path, catch_errors = False):
+def import_all_submodules(mod, path, catch_errors = False, exception_handler = None):
     # imported here so module can be used even if this isn't available
     # (e.g. Jython)
     import importlib
@@ -48,9 +50,14 @@ def import_all_submodules(mod, path, catch_errors = False):
                 # traceback.format_exception() formats the result in plain text, as a list of strings
                 import sys
                 import traceback
-                backtrace_text = ''.join(traceback.format_exception(*sys.exc_info()))
+                exception_info = sys.exc_info()
+                backtrace_text = ''.join(traceback.format_exception(*exception_info))
                 print '!!!! exception detected while importing submodules'
                 print backtrace_text
+
+                # if we have a callback, give it the exception
+                if exception_handler:
+                    exception_handler(e, backtrace_text, exception_info)
                 
                 # and now we swallow the exception and move on to the
                 # next one

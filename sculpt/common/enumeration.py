@@ -81,12 +81,26 @@ class Enumeration(object):
     _choices = None
     _labels = None
     
+    _values_are_strings = False
+
     def __init__(self, *args, **kwargs):
-        # pluck data from parameters
-        self._data = kwargs.get('choices', args)
+        # before we begin processing enumeration entries, scan
+        # it for callables which might yield generated entries;
+        # this can be used to generate additional enumerations
+        # that are partially derived from other enumerations
+        self._data = []
+        choices = kwargs.get('choices', args)
+        for t in choices:
+            if callable(t):
+                self._data.extend(t())
+            else:
+                self._data.append(t)
+
+        # pluck data from parameters now that the choices are
+        # fully generated and flattened
         default_column_names = ( 'value', 'id' ) if len(self._data) and len(self._data[0]) == 2 else ( 'value', 'id', 'label' )
         self._columns = kwargs.get('labels', default_column_names)
-        
+
         # create column-label to column-index lookup
         self._columns_idx = dict([ (self._columns[i],i) for i in range(len(self._columns)) ])
 
@@ -120,6 +134,14 @@ class Enumeration(object):
                     data_dict[column] = row[i]
                 else:
                     data_dict[column] = None
+
+        # we need to know if our values ever include strings
+        # because we change how get_value() works if our values
+        # include strings
+        for d in self._data_dicts:
+            if isinstance(d.get('value'), basestring):
+                self._values_are_strings = True
+                break
 
         # fun bit: we want .data to be a parameter proxy to
         # the get_data() method, but we need a reference to
@@ -190,14 +212,27 @@ class Enumeration(object):
     # a numerical value directly or its label; this method
     # accepts either and always returns the value
     #
-    # NOTE: does NOT validate the data; numbers not part
-    # of the enumeration will not be rejected and names
-    # not part of the enumeration will raise KeyError
+    # NOTE: does NOT validate values but may validate IDs;
+    # numbers not part of the enumeration will not be
+    # rejected, but names not part of the enumeration will
+    # raise AttributeError if none of the values are strings
     #
     def get_value(self, value):
         if isinstance(value, basestring):
-            # a string; assume it's an ID, convert to value
-            return self.get_data('id', value)['value']
+            if self._values_are_strings:
+                # this might be an ID or it might be a value;
+                # attempt to translate it, but don't throw an
+                # error if that fails
+                if value in self._idxs['id']:
+                    return self.get_data('id', value)['value']
+                else:
+                    return value
+
+            else:
+                # assume it's an ID, convert to value and
+                # raise AttributeError if it's wrong
+                return self.get_data('id', value)['value']
+
         else:
             # already a value, return as-is
             return value
@@ -223,6 +258,17 @@ class Enumeration(object):
     def __contains__(self, key):
         return key in self._idxs['id']
 
+    # and because it's useful, provide a method to
+    # iterate over the enumeration as dicts
+    def iter_dicts(self):
+        return self._data_dicts.__iter__()
+
+    # if you want to insert an enumeration directly
+    # without transforming its entries (e.g. with
+    # expand_enumeration) you can use this as a
+    # function that will be accepted by the constructor
+    def insert_enumeration(self):
+        return self._data
 
 # EnumerationData
 #
@@ -275,10 +321,39 @@ class Enumeration(object):
 # rather than directly passed so that the lookup is done
 # at the moment the data is fetched; in this way, the
 # data property can be added to a base class even if the
-# derived class overrides the enumeration.
+# derived class overrides the enumeration. If you must
+# reference an enumeration that isn't a member of the class
+# (possibly because you're sharing it among several
+# classes, which is good) then you can specify an actual
+# Enumeration object as well, but you will then lose the
+# polymorphic capability.
 #
 def EnumerationData(enumeration, fieldname):
     def inner(self):
-        return getattr(self,enumeration).get_data_by_id(getattr(self, fieldname))
+        if not isinstance(enumeration, Enumeration):
+            e = getattr(self, enumeration)
+        else:
+            e = enumeration
+        return e.get_data_by_id(getattr(self, fieldname))
     return inner
 
+
+# Sometimes we need an enumeration to be derived from,
+# or include elements of, another enumeration. To handle
+# this we define a simple method that walks through the
+# enumeration and a template, fills out any strings with
+# placeholders, and inserts the resulting list directly
+# into the new enumeration.
+#
+# NOTE: this actually returns a callable suitable for
+# use in the Enumeration choices list.
+#
+def expand_enumeration(template, source):
+
+    def inner():
+        expanded = []
+        for d in source._data_dicts:
+            expanded.append(tuple([ v % d if isinstance(v, basestring) else v for v in template ]))
+        return expanded
+
+    return inner
