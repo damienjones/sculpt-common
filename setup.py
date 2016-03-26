@@ -14,7 +14,7 @@ here = path.abspath(path.dirname(__file__))
 
 setup(
     name='sculpt.common',
-    version='0.2',
+    version='1.0',
     description='A collection of utilities for other sculpt.* libraries.',
     long_description='',
     url='https://github.com/damienjones/sculpt-common',
