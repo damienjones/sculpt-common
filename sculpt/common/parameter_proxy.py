@@ -62,7 +62,11 @@ def parameter_proxy(proxy_method_name, enumeration = None):
         cachename = proxy_method_name + '_proxy'
         if not hasattr(self, cachename):
             proxy_method = getattr(self, proxy_method_name)
-            setattr(self, cachename, ParameterProxy(proxy_method, enumeration))
+            if isinstance(enumeration, basestring):
+                e = getattr(self, enumeration)
+            else:
+                e = enumeration
+            setattr(self, cachename, ParameterProxy(proxy_method, e))
         return getattr(self, cachename)
 
     return inner

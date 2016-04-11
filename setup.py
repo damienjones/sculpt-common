@@ -14,7 +14,7 @@ here = path.abspath(path.dirname(__file__))
 
 setup(
     name='sculpt.common',
-    version='1.0',
+    version='1.1',
     description='A collection of utilities for other sculpt.* libraries.',
     long_description='',
     url='https://github.com/damienjones/sculpt-common',
@@ -22,7 +22,7 @@ setup(
     author_email='damien@codesculpture.com',
     license='LGPLv2',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
